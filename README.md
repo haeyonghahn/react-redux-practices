@@ -8,7 +8,7 @@
 이러한 점을 보완하기 위해 등장한 것이 `redux`이다. 그럼 redux를 사용해보자.
 
 ## redux 설치
-`yum install redux`
+`npm install redux`
 
 ## Store
 Store은 state를 관리하는 전용 장소이다. state들이 store에 객체형식으로 저장된다.
@@ -152,7 +152,7 @@ export default class DisplayNumberRoot extends Component{
 # React-Redux
 
 ## react-redux 설치
-`yum install react-redux`
+`npm install react-redux`
 
 ## React-Redux 셋팅
 최상위 컴포넌트(index.js)에 Provider를 공급해준다. store는 기존에 만들어뒀던 store를 사용한다.
