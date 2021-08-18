@@ -65,7 +65,7 @@ Action은 상태 변경을 일으키는 이벤트에 대한 정정인 정보로 
 ![redux devtools](./images/redux-devtools.png)
 - 위의 사진처럼 redux의 상태를 디버깅할 수 있다.
 
-### redux에 종속된 기능 제거 및 독립적으로 만들기
+## redux에 종속된 기능 제거 및 독립적으로 만들기
 src/component 폴더에 있는 컴포넌트이다.
 ```javaScript
 import React, {Component} from 'react';
@@ -149,6 +149,127 @@ export default class DisplayNumberRoot extends Component{
 }
 ```
 
+# React-Redux
+
+## react-redux 설치
+`yum install react-redux`
+
+## React-Redux 셋팅
+최상위 컴포넌트(index.js)에 Provider를 공급해준다. store는 기존에 만들어뒀던 store를 사용한다.
+```javaScript
+import React from 'react';
+import ReactDOM from 'react-dom';
+import './index.css';
+import App from './App';
+import reportWebVitals from './reportWebVitals';
+import {Provider} from 'react-redux';
+import store from './store';
+
+ReactDOM.render(<React.StrictMode>
+    <Provider store={store}>
+      <App />
+    </Provider>
+  </React.StrictMode>,
+  document.getElementById('root')
+);
+```
+
+## react-redux connect() 함수 이해
+참고 : [react-redux connect](https://gist.github.com/gaearon/1d19088790e70ac32ea636c025ba424e) 
+connect 함수의 return 값은 함수를 return 해준다. store 저장소에 상태값을 저장하는 컴포넌트를 사용하도록 되어있고(WrappedComponent)
+wrappedComponent는 Counter로 받는다. 예시) `connect(mapStateToProps)(DisplayNumber);`   
+wrappedComponent의 props들이 전달된다. 그리고 mapStateToProps와 mapDispatchToProps를 매개변수로 받는다.   
+`mapStateToProps` 는 store.getState() 함수를 사용한 것처럼, store에 저장되어있는 상태값들을 가져오는 함수이다.     
+`mapDispatchToProps` 는 dispatch() 내부에서 호출하는 새 함수를 반환하고 일반 작업 개체를 직접 전달하거나 작업 생성자의 결과를 전달하여 사용한다.
+```javaScript
+// connect() is a function that injects Redux-related props into your component.
+// You can inject data and callbacks that change that data by dispatching actions.
+function connect(mapStateToProps, mapDispatchToProps) {
+  // It lets us inject component as the last step so people can use it as a decorator.
+  // Generally you don't need to worry about it.
+  return function (WrappedComponent) {
+    // It returns a component
+    return class extends React.Component {
+      render() {
+        return (
+          // that renders your component
+          <WrappedComponent
+            {/* with its props  */}
+            {...this.props}
+            {/* and additional props calculated from Redux store */}
+            {...mapStateToProps(store.getState(), this.props)}
+            {...mapDispatchToProps(store.dispatch, this.props)}
+          />
+        )
+      }
+      
+      componentDidMount() {
+        // it remembers to subscribe to the store so it doesn't miss updates
+        this.unsubscribe = store.subscribe(this.handleChange.bind(this))
+      }
+      
+      componentWillUnmount() {
+        // and unsubscribe later
+        this.unsubscribe()
+      }
+    
+      handleChange() {
+        // and whenever the store state changes, it re-renders.
+        this.forceUpdate()
+      }
+    }
+  }
+}
+
+// This is not the real implementation but a mental model.
+// It skips the question of where we get the "store" from (answer: <Provider> puts it in React context)
+// and it skips any performance optimizations (real connect() makes sure we don't re-render in vain).
+
+// The purpose of connect() is that you don't have to think about
+// subscribing to the store or perf optimizations yourself, and
+// instead you can specify how to get props based on Redux store state:
+
+const ConnectedCounter = connect(
+  // Given Redux state, return props
+  state => ({
+    value: state.counter,
+  }),
+  // Given Redux dispatch, return callback props
+  dispatch => ({
+    onIncrement() {
+      dispatch({ type: 'INCREMENT' })
+    }
+  })
+)(Counter)
+```
+`mapDispatchToProps` : AddNumber 컴포넌트에서 onClick된 함수를 dispatch하여 store 저장소로 보낸다.
+```javaScript
+import AddNumber from "../components/AddNumber";
+import {connect} from 'react-redux';
+function mapDispatchToProps(dispatch){
+    return {
+        onClick:function(size){
+            dispatch({type:'INCREMENT', size:size});
+        }
+    }
+}
+export default connect(null, mapDispatchToProps)(AddNumber);
+```
+`mapStateToProps` : dispatch() 후 store에서 처리된 state를 DisplayNumber 컴포넌트에서 props로 받는다. 
+```javaScript
+import DisplayNumber from '../components/DisplayNumber';
+import {connect} from 'react-redux';
+function mapStateToProps(state){
+    return {
+        number:state.number
+    }
+}
+
+export default connect(mapStateToProps)(DisplayNumber);
+```
+
+
 ## 출처
+* https://opentutorials.org/module/4518
 * https://c17an.netlify.app/blog/React/redux-%EC%82%AC%EC%9A%A9%ED%95%98%EA%B8%B0/article/
 * https://libertegrace.tistory.com/entry/25-Redux-Redux%EC%9D%98-%EC%9E%91%EB%8F%99%EB%B0%A9%EC%8B%9D
