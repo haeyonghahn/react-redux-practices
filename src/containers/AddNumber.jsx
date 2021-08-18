@@ -8,6 +8,7 @@ function mapDispatchToProps(dispatch){
     }
 }
 export default connect(null, mapDispatchToProps)(AddNumber);
+
 /*
 import React, { Component } from "react";
 import store from '../store';
