@@ -11,7 +11,7 @@
 `npm install redux`
 
 ## Store
-Store은 state를 관리하는 전용 장소이다. state들이 store에 객체형식으로 저장된다.
+Store은 state를 관리하는 전용 장소이다. state들이 store에 객체형식으로 저장된다. 
 ```json
 {
   // 세션과 관련된 것
